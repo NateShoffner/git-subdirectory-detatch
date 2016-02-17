@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 
@@ -48,9 +49,11 @@ subprocess.call(['git',
 
 os.chdir(new_repo_path)
 
+unix_subdirectory_path = subdirectory_path
+
 # convert windows paths to unix paths for folder depths > 1
 if sys.platform == 'win32' and subdirectory_path.count('\\') > 1:
-    subdirectory_path = subdirectory_path.replace('\\', '/')
+    unix_subdirectory_path = subdirectory_path.replace('\\', '/')
 
 # discard everything but our subdirectory, promote to root level
 print 'Discarding unwanted changes...'
@@ -63,7 +66,6 @@ subprocess.call(['git',
                  '--all'])
 subprocess.call(['git', 'reset', '--hard'])
 
-
 # cleanup
 print 'Cleaning up...'
 subprocess.call(['git', 'gc', '--aggressive'])
@@ -72,3 +74,16 @@ subprocess.call(['git', 'prune'])
 # origin stuff
 print 'Removing old origin..'
 subprocess.call(['git', 'remote', 'rm', 'origin'])
+
+# remove from original repo
+print "Removing subdirectory from original repository"
+os.chdir(original_repo_path)
+shutil.rmtree(os.path.abspath(subdirectory_path))
+subprocess.call(['git',
+                 'add',
+                 '-u',
+                 unix_subdirectory_path])
+subprocess.call(['git',
+                 'commit',
+                 '-m',
+                 'Detatched %s into separate repository' % subdirectory_path])
