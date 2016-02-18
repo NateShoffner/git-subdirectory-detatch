@@ -4,6 +4,12 @@ import shutil
 import subprocess
 import sys
 
+# convert windows paths to unix paths for folder depths > 1
+def unixify_path(path):
+    if sys.platform == 'win32' and subdirectory_path.count('\\') > 1:
+        return subdirectory_path.replace('\\', '/')
+    return path;
+
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -49,18 +55,14 @@ subprocess.call(['git',
 
 os.chdir(new_repo_path)
 
-unix_subdirectory_path = subdirectory_path
-
-# convert windows paths to unix paths for folder depths > 1
-if sys.platform == 'win32' and subdirectory_path.count('\\') > 1:
-    unix_subdirectory_path = subdirectory_path.replace('\\', '/')
+unix_subdirectory_path = unixify_path(subdirectory_path)
 
 # discard everything but our subdirectory, promote to root level
 print 'Discarding unwanted changes...'
 subprocess.call(['git',
                  'filter-branch',
                  '--subdirectory-filter',
-                 subdirectory_path,
+                 unix_subdirectory_path,
                  'HEAD',
                  '--',
                  '--all'])
