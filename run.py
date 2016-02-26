@@ -8,7 +8,9 @@ import sys
 def unixify_path(path):
     if sys.platform == 'win32' and subdirectory_path.count('\\') > 1:
         return subdirectory_path.replace('\\', '/')
-    return path;
+    return path
+
+new_remote = None
 
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
@@ -26,19 +28,25 @@ if len(sys.argv) > 1:
         '--subdirectory_path',
         type=str,
         nargs='?',
-        help='Relative path of subdirectory path to isolate.')
+        help='Subdirectory path to isolate (relative to repo directory):')
+    parser.add_argument(
+        '-new_remote',
+        type=str,
+        nargs='?',
+        help='New remote repo.')
     args = parser.parse_args()
 
     original_repo_path = args.repo_dir
     new_repo_path = args.output_dir
     subdirectory_path = args.subdirectory_path
+    new_remote = args.new_remote
 else:
-    original_repo_path = input('Original Repo Path: ')
-    new_repo_path = input('New Repo Path: ')
+    original_repo_path = input('Path of original repo: ')
+    new_repo_path = input('Path of final output directory: ')
     subdirectory_path = input(
         'Subdirectory path to isolate (relative to %s): ' %
         new_repo_path)
-
+    new_remote = input('New remote repo (optional): ')
 if not os.path.exists(new_repo_path):
     os.makedirs(new_repo_path)
 else:
@@ -76,6 +84,8 @@ subprocess.call(['git', 'prune'])
 # origin stuff
 print 'Removing old origin..'
 subprocess.call(['git', 'remote', 'rm', 'origin'])
+if new_remote:
+    subprocess.call(['git', 'remote', 'add', 'origin', new_remote])
 
 # remove from original repo
 print "Removing subdirectory from original repository"
