@@ -41,12 +41,12 @@ if len(sys.argv) > 1:
     subdirectory_path = args.subdirectory_path
     new_remote = args.new_remote
 else:
-    original_repo_path = input('Path of original repo: ')
-    new_repo_path = input('Path of final output directory: ')
-    subdirectory_path = input(
+    original_repo_path = raw_input('Path of original repo: ')
+    new_repo_path = raw_input('Path of final output directory: ')
+    subdirectory_path = raw_input(
         'Subdirectory path to isolate (relative to %s): ' %
         new_repo_path)
-    new_remote = input('New remote repo (optional): ')
+    new_remote = raw_input('New remote repo (optional): ')
 if not os.path.exists(new_repo_path):
     os.makedirs(new_repo_path)
 else:
